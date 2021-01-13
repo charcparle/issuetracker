@@ -4,11 +4,13 @@ const express     = require('express');
 const bodyParser  = require('body-parser');
 const expect      = require('chai').expect;
 const cors        = require('cors');
+const mongoose    = require('mongoose')
 require('dotenv').config();
 
 const apiRoutes         = require('./routes/api.js');
 const fccTestingRoutes  = require('./routes/fcctesting.js');
 const runner            = require('./test-runner');
+
 
 let app = express();
 
@@ -16,7 +18,11 @@ app.use('/public', express.static(process.cwd() + '/public'));
 
 app.use(cors({origin: '*'})); //For FCC testing purposes only
 
-
+// Request Logger
+app.use((req, res, next) => {
+  console.log(req.method + " " + req.path + " - " + req.ip);
+  next();
+})
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -36,9 +42,17 @@ app.route('/')
 //For FCC testing purposes
 fccTestingRoutes(app);
 
-//Routing for API 
-apiRoutes(app);  
-    
+// Mongoose - Connect to MongoDB
+mongoose.connect(process.env.DB, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log('Connection to the Atlas Cluster is successful!')
+  })
+  .catch((err) => console.error(err));
+
+
+// Route API
+apiRoutes(app, mongoose);
+
 //404 Not Found Middleware
 app.use(function(req, res, next) {
   res.status(404)
