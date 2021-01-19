@@ -48,6 +48,7 @@ mongoose.connect(process.env.DB, { useNewUrlParser: true, useUnifiedTopology: tr
     console.log('Connection to the Atlas Cluster is successful!')
   })
   .catch((err) => console.error(err));
+mongoose.set('useFindAndModify', false);
 
 
 // Route API
