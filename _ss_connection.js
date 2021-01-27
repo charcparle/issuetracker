@@ -2,7 +2,7 @@ require('dotenv').config();
 const { MongoClient } = require('mongodb');
 
 async function main(callback) {
-    const URI = process.env.DB; // Declare MONGO_URI in your .env file
+    const URI = process.env.DB; // Declare MONGO_URI in your .env file issueTracker?retryWrites=true&w=majority
     const client = new MongoClient(URI, { useNewUrlParser: true, useUnifiedTopology: true});
     console.log("this is inside connection.js-main");
     try {

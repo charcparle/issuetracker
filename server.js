@@ -43,16 +43,17 @@ app.route('/')
 fccTestingRoutes(app);
 
 // Mongoose - Connect to MongoDB
+/*
 mongoose.connect(process.env.DB, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log('Connection to the Atlas Cluster is successful!')
   })
   .catch((err) => console.error(err));
 mongoose.set('useFindAndModify', false);
-
+*/
 
 // Route API
-apiRoutes(app, mongoose);
+apiRoutes(app);
 
 //404 Not Found Middleware
 app.use(function(req, res, next) {

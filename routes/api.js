@@ -1,9 +1,9 @@
 'use strict';
 const express = require('express');
-
+const mongoose    = require('mongoose');
 const app = express();
 
-module.exports = (app, mongoose)=>{
+module.exports = (app)=>{
   console.log("apiRoutes is imported")
   const Schema = mongoose.Schema;
   const issueSchema = new Schema({
@@ -17,13 +17,23 @@ module.exports = (app, mongoose)=>{
     updated_on: {type: Date, required: true}
   })
   let Issue = mongoose.model('Issue', issueSchema);
-  console.log(Issue);
+
+  async function connect(project){
+    let connectDB = await mongoose.connect(process.env.DB, { dbName: project, useNewUrlParser: true, useUnifiedTopology: true })
+      .then(() => {
+        console.log(`Connection to the Atlas Cluster db: ${project} is successful!`)
+        //let Issue = mongoose.model('Issue', issueSchema);
+      })
+      .catch((err) => console.error(err));
+    mongoose.set('useFindAndModify', false);
+  }
+
   app.route('/api/issues/:project')
   
     .get((req, res)=>{
       let project = req.params.project;
-      console.log(req.body);
       async function showList(){
+        console.log('inside showList');
         let list = await Issue.aggregate([
           {
             $project: {
@@ -39,9 +49,10 @@ module.exports = (app, mongoose)=>{
             }
           }
         ]);
-        res.send(list);
+        res.json(list);
       }
-      showList(res).then(console.log("showList loaded"));
+      
+      connect(project).then(showList()).then(console.log("showList loaded"));
     })
     
     .post((req, res)=>{
@@ -60,7 +71,7 @@ module.exports = (app, mongoose)=>{
         updated_on: timeNow
       }
       Issue.create(newIssue,(err,data)=>{
-        if (err) console.log(err);
+        if (err) console.log(err.kind);
         /*
         let rtnObj = {
           assigned_to: data.assigned_to,
@@ -74,11 +85,12 @@ module.exports = (app, mongoose)=>{
           updated_on: data.updated_on
         }
         */
-        async function showList(){
+        res.json(data)
+        async function showList(data){
           //use aggregate to show the new items, passed in as data
-          res.json(list);
+          res.json(data);
         }
-        showList(res).then(console.log("showList loaded"));
+        //showList(res).then(console.log("showList loaded"));
       })
     })
     
