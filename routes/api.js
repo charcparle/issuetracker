@@ -52,102 +52,96 @@ module.exports = (app)=>{
         res.json(list);
       }
       
-      connect(project).then(showList()).then(console.log("showList loaded"));
+      connect(project).then(showList());
     })
     
     .post((req, res)=>{
       let project = req.params.project;
-      console.log(project)
+      console.log(project);
       console.log(req.body);
-      let timeNow = Date.now();
-      let newIssue = {
-        assigned_to: req.body.assigned_to,
-        status_text: req.body.status_text,
-        open: true,
-        issue_title: req.body.issue_title,
-        issue_text: req.body.issue_text,
-        created_by: req.body.created_by,
-        created_on: timeNow,
-        updated_on: timeNow
-      }
-      Issue.create(newIssue,(err,data)=>{
-        if (err) console.log(err.kind);
-        /*
-        let rtnObj = {
-          assigned_to: data.assigned_to,
-          status_text: data.status_text,
-          open: data.open,
-          _id: data._id,
-          issue_title: data.issue_title,
-          issue_text: data.issue_text,
-          created_by: data.created_by,
-          created_on: data.created_on,
-          updated_on: data.updated_on
+      async function createDoc(){
+        let timeNow = Date.now();
+        let newIssue = {
+          assigned_to: req.body.assigned_to,
+          status_text: req.body.status_text,
+          open: true,
+          issue_title: req.body.issue_title,
+          issue_text: req.body.issue_text,
+          created_by: req.body.created_by,
+          created_on: timeNow,
+          updated_on: timeNow
         }
-        */
-        res.json(data)
-        async function showList(data){
-          //use aggregate to show the new items, passed in as data
+        Issue.create(newIssue,(err,data)=>{
+          if (err) console.log(err.kind);
           res.json(data);
-        }
-        //showList(res).then(console.log("showList loaded"));
-      })
+          async function showList(data){
+            //use aggregate to show the new items, passed in as data
+            res.json(data);
+          }
+          //showList(res).then(console.log("showList loaded"));
+        })
+      }
+      connect(project).then(createDoc);
     })
     
     .put((req, res)=>{
       let project = req.params.project;
       console.log(req.body)
-      let update = {
-        open: true,
-        updated_on: Date.now()
-      };
-      let nilUpdate = true;
-      if (req.body.assigned_to!="" && req.body.assigned_to!=null) {
-        update["assigned_to"] = req.body.assigned_to;
-        nilUpdate = false;
-      }
-      if (req.body.status_text!="" && req.body.status_text!=null) {
-        update["status_text"] = req.body.status_text;
-        nilUpdate = false;
-      }
-      if (req.body.issue_title!="" && req.body.issue_title!=null) {
-        update["issue_title"] = req.body.issue_title;
-        nilUpdate = false;
-      }
-      if (req.body.issue_text!="" && req.body.issue_text!=null) {
-        update["issue_text"] = req.body.issue_text;
-        nilUpdate = false;
-      }
-      if (req.body.open!=null) {
-        update["open"] = false;
-        console.log(`open: ${update["open"]}`)
-        nilUpdate = false;
-      }
-      let id = mongoose.Types.ObjectId(req.body._id);
-      if (req.body._id==null){
-        console.log('missing _id')
-        res.json({error: 'missing _id'});
-      } else if (nilUpdate) {
-        let rtnObj = {
-          error: 'no update field(s) sent', 
-          '_id': req.body._id
+      async function updateDoc(){
+        let update = {
+          open: true,
+          updated_on: Date.now()
+        };
+        let nilUpdate = true;
+        if (req.body.assigned_to!="" && req.body.assigned_to!=null) {
+          update["assigned_to"] = req.body.assigned_to;
+          nilUpdate = false;
         }
-        console.log(rtnObj)
-        res.json(rtnObj);
-      } else {
-        //let id = mongoose.Types.ObjectId(req.body._id);
-        Issue.findByIdAndUpdate(id, update, (err,data)=>{
-          if (err) {
-            console.log(error)
-            res.json({
-              error: 'could not update', 
-              '_id': req.body._id
-            })
+        if (req.body.status_text!="" && req.body.status_text!=null) {
+          update["status_text"] = req.body.status_text;
+          nilUpdate = false;
+        }
+        if (req.body.issue_title!="" && req.body.issue_title!=null) {
+          update["issue_title"] = req.body.issue_title;
+          nilUpdate = false;
+        }
+        if (req.body.issue_text!="" && req.body.issue_text!=null) {
+          update["issue_text"] = req.body.issue_text;
+          nilUpdate = false;
+        }
+        if (req.body.open!=null) {
+          update["open"] = false;
+          console.log(`open: ${update["open"]}`)
+          nilUpdate = false;
+        }
+        let id = mongoose.Types.ObjectId(req.body._id);
+        if (req.body._id==null){
+          console.log('missing _id')
+          res.json({error: 'missing _id'});
+        } else if (nilUpdate) {
+          let rtnObj = {
+            error: 'no update field(s) sent', 
+            '_id': req.body._id
           }
-        });
-        console.log('successfully updated')
-        res.json({result: 'successfully updated', '_id': req.body._id})
+          console.log(rtnObj)
+          res.json(rtnObj);
+        } else {
+          //let id = mongoose.Types.ObjectId(req.body._id);
+          Issue.findByIdAndUpdate(id, update, (err,data)=>{
+            if (err) {
+              console.log(error)
+              res.json({
+                error: 'could not update', 
+                '_id': req.body._id
+              })
+            }
+          });
+          console.log('successfully updated')
+          res.json({result: 'successfully updated', '_id': req.body._id})
+        }
+
       }
+      connect(project).then(updateDoc);
     })
     
     .delete((req, res)=>{
