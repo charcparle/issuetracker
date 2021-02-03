@@ -37,15 +37,28 @@ module.exports = (app)=>{
         let list = await Issue.aggregate([
           {
             $project: {
-              assigned_to: 1,
-              status_text: 1,
-              open: 1,
-              "_id": 1,
-              issue_title: 1,
-              issue_text: 1,
-              created_by: 1,
-              created_on: 1,
-              updated_on: 1
+              a: {$ifNull: ["$assigned_to", ""]},
+              b: {$ifNull: ["$assigned_to", ""]},
+              c: "$open",
+              d: "$_id",
+              e: "$issue_title",
+              f: "$issue_text",
+              g: "$created_by",
+              h: "$created_on",
+              i: "$updated_on"
+            }
+          },
+          {
+            $project: {
+              assigned_to: "$a",
+              status_text: "$b",
+              open: "$c",
+              _id: "$d",
+              issue_title: "$e",
+              issue_text: "$f",
+              created_by: "$g",
+              created_on: "$h",
+              updated_on: "$i"
             }
           }
         ]);
@@ -62,8 +75,8 @@ module.exports = (app)=>{
       async function createDoc(){
         let timeNow = Date.now();
         let newIssue = {
-          assigned_to: req.body.assigned_to,
-          status_text: req.body.status_text,
+          assigned_to: req.body.assigned_to || "",
+          status_text: req.body.status_text || "",
           open: true,
           issue_title: req.body.issue_title,
           issue_text: req.body.issue_text,
@@ -134,10 +147,12 @@ module.exports = (app)=>{
                 error: 'could not update', 
                 '_id': req.body._id
               })
+            } else {
+              console.log('successfully updated')
+              res.json({result: 'successfully updated', '_id': req.body._id})
             }
           });
-          console.log('successfully updated')
-          res.json({result: 'successfully updated', '_id': req.body._id})
+          
         }
 
       }
@@ -146,6 +161,26 @@ module.exports = (app)=>{
     
     .delete((req, res)=>{
       let project = req.params.project;
-      
+      async function deleteDoc(){
+        if (req.body._id==null) {
+          res.json({error: 'missing _id'})
+        } else {
+          let id = req.body._id;
+          Issue.deleteOne({_id: id}, (err, result)=>{
+            if (err) {
+              console.log(err)
+              res.json({
+                  error: 'could not delete', 
+                  '_id': id
+                })
+            } else {
+              console.log('successfully deleted')
+              res.json({result: 'successfully deleted', '_id': id})
+            }
+            
+          })
+        }
+      }
+      connect(project).then(deleteDoc);
     });
 };
