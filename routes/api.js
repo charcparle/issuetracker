@@ -85,13 +85,22 @@ module.exports = (app)=>{
           updated_on: timeNow
         }
         Issue.create(newIssue,(err,data)=>{
-          if (err) console.log(err.kind);
-          res.json(data);
-          async function showList(data){
-            //use aggregate to show the new items, passed in as data
+          //console.log(err.errors)
+          if (err) {
+            for (let errName in err.errors){
+              console.log(`kind: ${err.errors[errName].kind}`)
+              if (err.errors[errName].kind=='required'){
+                res.json({error: 'required field(s) missing'})
+              } else {
+                console.log(`{error: ${err.errors[errName].kind}}`)
+                //res.json({error: err.errors[errName].kind})
+              }
+            }
+
+          } else {
             res.json(data);
           }
-          //showList(res).then(console.log("showList loaded"));
+          
         })
       }
       connect(project).then(createDoc);
@@ -142,7 +151,7 @@ module.exports = (app)=>{
           //let id = mongoose.Types.ObjectId(req.body._id);
           Issue.findByIdAndUpdate(id, update, (err,data)=>{
             if (err) {
-              console.log(error)
+              console.log(err)
               res.json({
                 error: 'could not update', 
                 '_id': req.body._id
@@ -161,12 +170,14 @@ module.exports = (app)=>{
     
     .delete((req, res)=>{
       let project = req.params.project;
+      console.log(req.body)
       async function deleteDoc(){
         if (req.body._id==null) {
+          console.log('missing _id')
           res.json({error: 'missing _id'})
         } else {
           let id = req.body._id;
-          Issue.deleteOne({_id: id}, (err, result)=>{
+          Issue.deleteOne({_id:id}, (err, result)=>{
             if (err) {
               console.log(err)
               res.json({
@@ -174,7 +185,7 @@ module.exports = (app)=>{
                   '_id': id
                 })
             } else {
-              console.log('successfully deleted')
+              console.log(`successfully deleted, _id: ${id}`)
               res.json({result: 'successfully deleted', '_id': id})
             }
             
