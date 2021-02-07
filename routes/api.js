@@ -16,17 +16,24 @@ module.exports = (app)=>{
     created_on: {type: Date, required: true},
     updated_on: {type: Date, required: true}
   })
-  let Issue = mongoose.model('Issue', issueSchema);
-
-  async function connect(project){
-    let connectDB = await mongoose.connect(process.env.DB, { dbName: project, useNewUrlParser: true, useUnifiedTopology: true })
+  //let Issue = mongoose.model('Issue', issueSchema);
+  // ref: https://stackoverflow.com/questions/52067945/when-to-close-a-mongodb-connection
+  async function connectAtStart(){
+    let connectDB = await mongoose.connect(process.env.DB, { useNewUrlParser: true, useUnifiedTopology: true })
       .then(() => {
-        console.log(`Connection to the Atlas Cluster db: ${project} is successful!`)
+        console.log(`Connection to the Atlas Cluster db is successful!`)
         //let Issue = mongoose.model('Issue', issueSchema);
       })
       .catch((err) => console.error(err));
     mongoose.set('useFindAndModify', false);
   }
+
+  const connect = async (project)=>{
+    await mongoose.connection.useDb(project);
+    console.log(`Db: ${project}`)
+  }
+
+  connectAtStart();
 
   app.route('/api/issues/:project')
   
@@ -37,6 +44,9 @@ module.exports = (app)=>{
         console.log('inside showList');
         let filter = req.query;
         console.log(filter)
+        let currentDB = await mongoose.connection.useDb(project);
+        let Issue = currentDB.model('Issue', issueSchema)
+        
         let list = await Issue.aggregate([
           {
             $match: filter
@@ -71,7 +81,7 @@ module.exports = (app)=>{
         res.json(list);
       }
       
-      connect(project).then(showList());
+      showList();
     })
     
     .post((req, res)=>{
