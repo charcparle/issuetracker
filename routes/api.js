@@ -17,7 +17,6 @@ module.exports = (app)=>{
     updated_on: {type: Date, required: true}
   })
   //let Issue = mongoose.model('Issue', issueSchema);
-  // ref: https://stackoverflow.com/questions/52067945/when-to-close-a-mongodb-connection
   async function connectAtStart(){
     let connectDB = await mongoose.connect(process.env.DB, { useNewUrlParser: true, useUnifiedTopology: true })
       .then(() => {
@@ -29,8 +28,9 @@ module.exports = (app)=>{
   }
 
   const connect = async (project)=>{
-    await mongoose.connection.useDb(project);
-    console.log(`Db: ${project}`)
+    let currentDB = await mongoose.connection.useDb(project);
+    console.log(`Db: ${project}`);
+    return currentDB;
   }
 
   connectAtStart();
@@ -43,9 +43,9 @@ module.exports = (app)=>{
       async function showList(){
         console.log('inside showList');
         let filter = req.query;
-        console.log(filter)
-        let currentDB = await mongoose.connection.useDb(project);
-        let Issue = currentDB.model('Issue', issueSchema)
+        console.log(filter);
+        let currentDB = await connect(project);
+        let Issue = currentDB.model('Issue', issueSchema);
         
         let list = await Issue.aggregate([
           {
@@ -101,6 +101,8 @@ module.exports = (app)=>{
           created_on: timeNow,
           updated_on: timeNow
         }
+        let currentDB = await connect(project);
+        let Issue = currentDB.model('Issue', issueSchema);
         Issue.create(newIssue,(err,data)=>{
           //console.log(err.errors)
           if (err) {
@@ -130,8 +132,7 @@ module.exports = (app)=>{
           }
         })
       }
-
-      connect(project).then(createDoc);
+      createDoc();
     })
     
     .put((req, res)=>{
@@ -164,7 +165,13 @@ module.exports = (app)=>{
           console.log(`open: ${update["open"]}`)
           nilUpdate = false;
         }
-        let id = mongoose.Types.ObjectId(req.body._id);
+        let id = req.body._id;
+        try {
+          id = mongoose.Types.ObjectId(req.body._id);
+        } catch (e) {
+          console.log(`e: ${e}`);
+          id = "000000000000000000000000"                    
+        }
         if (req.body._id==null){
           console.log('missing _id')
           res.json({error: 'missing _id'});
@@ -176,9 +183,11 @@ module.exports = (app)=>{
           console.log(rtnObj)
           res.json(rtnObj);
         } else {
-          //let id = mongoose.Types.ObjectId(req.body._id);
+          let currentDB = await connect(project);
+          let Issue = currentDB.model('Issue', issueSchema);
+          console.log(`id: ${id}`)
           Issue.findByIdAndUpdate(id, update, (err,data)=>{
-            if (err) {
+            if (err || (data==null)) {
               console.log(err)
               res.json({
                 error: 'could not update', 
@@ -186,6 +195,7 @@ module.exports = (app)=>{
               })
             } else {
               console.log('successfully updated')
+              console.log(`data: ${data}`)
               res.json({result: 'successfully updated', '_id': req.body._id})
             }
           });
@@ -193,7 +203,7 @@ module.exports = (app)=>{
         }
 
       }
-      connect(project).then(updateDoc);
+      updateDoc();
     })
     
     .delete((req, res)=>{
@@ -205,14 +215,24 @@ module.exports = (app)=>{
           res.json({error: 'missing _id'})
         } else {
           let id = req.body._id;
+          try {
+            id = mongoose.Types.ObjectId(req.body._id);
+          } catch (e) {
+            console.log(`e: ${e}`);
+            id = "000000000000000000000000"                    
+          }
+          let currentDB = await connect(project);
+          let Issue = currentDB.model('Issue', issueSchema);
           Issue.deleteOne({_id:id}, (err, result)=>{
-            if (err) {
+            if (err || result.deletedCount==0) {
               console.log(err)
               res.json({
                   error: 'could not delete', 
                   '_id': id
                 })
             } else {
+              console.log(`deletedCount: ${result.deletedCount}`)
+              console.log(result)
               console.log(`successfully deleted, _id: ${id}`)
               res.json({result: 'successfully deleted', '_id': id})
             }
@@ -220,6 +240,6 @@ module.exports = (app)=>{
           })
         }
       }
-      connect(project).then(deleteDoc);
+      deleteDoc();
     });
 };

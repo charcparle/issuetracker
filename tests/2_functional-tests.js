@@ -56,7 +56,7 @@ suite('Functional Tests', function() {
         .send(submit)
         .end((err, res)=>{
           assert.equal(res.status, 200);
-          assert.equal(res.body, {"error": 'required field(s) missing'});
+          assert.deepEqual(res.body, {"error": 'required field(s) missing'});
           done();
         });
   });
@@ -75,29 +75,232 @@ suite('Functional Tests', function() {
   test('5# View issues on a project with one filter: GET request to /api/issues/{project}', function(done) {
     console.log("running test 5")
     let filter = {
-      issue_title: "Test 2 title"
+      created_by: "fCC"
     }
-    let result = [{"assigned_to":"count","status_text":"count","open":true,"_id":"601f4856142a86010b5897a2","issue_title":"wow","issue_text":"hey stop","created_by":"there you","created_on":"2021-02-07T01:54:30.859Z","updated_on":"2021-02-07T01:54:30.859Z"}]
+    let result = [{"assigned_to":"","status_text":"","open":true,"_id":"601c0cd132fe6000dbfd99f4","issue_title":"Faux Issue Title","issue_text":"Functional Test - Required Fields Only","created_by":"fCC","created_on":"2021-02-04T15:03:45.304Z","updated_on":"2021-02-04T15:03:45.304Z"},{"assigned_to":"Chai and Mocha","status_text":"Chai and Mocha","open":true,"_id":"601c0cd132fe6000dbfd99f5","issue_title":"Faux Issue Title 2","issue_text":"Functional Test - Every field filled in","created_by":"fCC","created_on":"2021-02-04T15:03:45.596Z","updated_on":"2021-02-04T15:03:45.596Z"},{"assigned_to":"","status_text":"","open":true,"_id":"601c0cd232fe6000dbfd99f7","issue_title":"Faux Issue 1","issue_text":"Get Issues Test","created_by":"fCC","created_on":"2021-02-04T15:03:46.067Z","updated_on":"2021-02-04T15:03:46.067Z"},{"assigned_to":"","status_text":"","open":true,"_id":"601c0cd232fe6000dbfd99f8","issue_title":"Faux Issue 2","issue_text":"Get Issues Test","created_by":"fCC","created_on":"2021-02-04T15:03:46.311Z","updated_on":"2021-02-04T15:03:46.311Z"},{"assigned_to":"","status_text":"","open":true,"_id":"601c0cd232fe6000dbfd99f9","issue_title":"Faux Issue 3","issue_text":"Get Issues Test","created_by":"fCC","created_on":"2021-02-04T15:03:46.540Z","updated_on":"2021-02-04T15:03:46.540Z"},{"assigned_to":"","status_text":"","open":true,"_id":"601c0cd432fe6000dbfd99fe","issue_title":"Issue to be Updated","issue_text":"New Issue Text","created_by":"fCC","created_on":"2021-02-04T15:03:48.332Z","updated_on":"2021-02-04T15:03:48.747Z"}]
     chai.request(server)
         .get('/api/issues/ftests')
+        .query(filter)
         .end((err, res)=>{
           assert.equal(res.status, 200);
-          //assert .equal(res.body, result)
+          assert.deepEqual(res.body, result)
           assert.typeOf(res.body, 'array');
           done();
         });
   });
-  /*
-View issues on a project with multiple filters: GET request to /api/issues/{project}
-Update one field on an issue: PUT request to /api/issues/{project}
-Update multiple fields on an issue: PUT request to /api/issues/{project}
-Update an issue with missing _id: PUT request to /api/issues/{project}
-Update an issue with no fields to update: PUT request to /api/issues/{project}
-Update an issue with an invalid _id: PUT request to /api/issues/{project}
-Delete an issue: DELETE request to /api/issues/{project}
-Delete an issue with an invalid _id: DELETE request to /api/issues/{project}
-Delete an issue with missing _id: DELETE request to /api/issues/{project}
-  */
 
+  test('6# View issues on a project with multiple filters: GET request to /api/issues/{project}', function(done) {
+    console.log("running test 6")
+    let filter = {
+      created_by: "fCC",
+      issue_text: "Get Issues Test"
+    }
+    let result = [
+                  {
+                  "assigned_to": "",
+                  "status_text": "",
+                  "open": true,
+                  "_id": "601c0cd232fe6000dbfd99f7",
+                  "issue_title": "Faux Issue 1",
+                  "issue_text": "Get Issues Test",
+                  "created_by": "fCC",
+                  "created_on": "2021-02-04T15:03:46.067Z",
+                  "updated_on": "2021-02-04T15:03:46.067Z"
+                  },
+                  {
+                  "assigned_to": "",
+                  "status_text": "",
+                  "open": true,
+                  "_id": "601c0cd232fe6000dbfd99f8",
+                  "issue_title": "Faux Issue 2",
+                  "issue_text": "Get Issues Test",
+                  "created_by": "fCC",
+                  "created_on": "2021-02-04T15:03:46.311Z",
+                  "updated_on": "2021-02-04T15:03:46.311Z"
+                  },
+                  {
+                  "assigned_to": "",
+                  "status_text": "",
+                  "open": true,
+                  "_id": "601c0cd232fe6000dbfd99f9",
+                  "issue_title": "Faux Issue 3",
+                  "issue_text": "Get Issues Test",
+                  "created_by": "fCC",
+                  "created_on": "2021-02-04T15:03:46.540Z",
+                  "updated_on": "2021-02-04T15:03:46.540Z"
+                  }
+                ]
+    chai.request(server)
+        .get('/api/issues/ftests')
+        .query(filter)
+        .end((err, res)=>{
+          assert.equal(res.status, 200);
+          assert.deepEqual(res.body, result)
+          assert.typeOf(res.body, 'array');
+          done();
+        });
+  });
 
+  test('7# Update one field on an issue: PUT request to /api/issues/{project}', function(done) {
+    console.log("running test 7");
+    let filter = {
+      _id: '601c22832943aa0503e1a8ab',
+      issue_text: 'test 1 issue, updated in test 7'
+    };
+    let result = {
+                  "result": "successfully updated",
+                  "_id": "601c22832943aa0503e1a8ab"
+                };
+    chai.request(server)
+        .put('/api/issues/ftests')
+        .send(filter)
+        .end((err, res)=>{
+          assert.equal(res.status, 200);
+          assert.deepEqual(res.body, result);
+          done();
+        });
+  });
+
+  test('8# Update multiple fields on an issue: PUT request to /api/issues/{project}', function(done) {
+    console.log("running test 8");
+    let filter = {
+      _id: '601c22832943aa0503e1a8ab',
+      issue_text: 'test 1 issue, updated in test 8',
+      issue_title: 'Test 1 title, updated in test 8'
+    };
+    let result = {
+                  "result": "successfully updated",
+                  "_id": "601c22832943aa0503e1a8ab"
+                };
+    chai.request(server)
+        .put('/api/issues/ftests')
+        .send(filter)
+        .end((err, res)=>{
+          assert.equal(res.status, 200);
+          assert.deepEqual(res.body, result);
+          done();
+        });
+  });
+
+  test('9# Update an issue with missing _id: PUT request to /api/issues/{project}', function(done) {
+    console.log("running test 9");
+    let filter = {
+      issue_text: 'test 1 issue, updated in test 8',
+      issue_title: 'Test 1 title, updated in test 8'
+    };
+    let result = { error: 'missing _id' };
+    chai.request(server)
+        .put('/api/issues/ftests')
+        .send(filter)
+        .end((err, res)=>{
+          assert.equal(res.status, 200);
+          assert.deepEqual(res.body, result);
+          done();
+        });
+  });
+
+  test('10# Update an issue with no fields to update: PUT request to /api/issues/{project}', function(done) {
+    console.log("running test 10");
+    let filter = {
+      _id: '601c22832943aa0503e1a8ab'
+    };
+    let result = { error: 'no update field(s) sent', '_id': '601c22832943aa0503e1a8ab' };
+    chai.request(server)
+        .put('/api/issues/ftests')
+        .send(filter)
+        .end((err, res)=>{
+          assert.equal(res.status, 200);
+          assert.deepEqual(res.body, result);
+          done();
+        });
+  });
+
+  test('11# Update an issue with an invalid _id: PUT request to /api/issues/{project}', function(done) {
+    console.log("running test 11");
+    let filter = {
+      _id: 'invalidID',
+      issue_text: 'test 1 issue, updated in test 8'
+    };
+    let result = { error: 'could not update', '_id': 'invalidID' };
+    chai.request(server)
+        .put('/api/issues/ftests')
+        .send(filter)
+        .end((err, res)=>{
+          assert.equal(res.status, 200);
+          assert.deepEqual(res.body, result);
+          done();
+        });
+  });
+
+  test('12# Delete an issue: DELETE request to /api/issues/{project}', function(done) {
+    console.log("running test 12");
+
+    let submit={
+      issue_title: "To Be Deleted",
+      issue_text: "dust",
+      created_by: "nobody",
+      open: true
+    };
+    const idForRemoval = async ()=>{
+      let id=0;
+      await chai.request(server)
+        .post('/api/issues/ftests')
+        .send(submit)
+        .then((err, res)=>{
+          if (err) {
+            //console.log(err)
+          } else {
+            let id = res.body._id
+            //console.log(id)
+          };
+        });
+      return id;
+    }
+
+    let someId = idForRemoval();
+    //console.log(someId)
+    
+    let filter = {
+      _id: someId
+    };
+    let result = { result: 'successfully deleted', '_id': someId };
+    chai.request(server)
+        .delete('/api/issues/ftests')
+        .send(filter)
+        .end((err, res)=>{
+          assert.equal(res.status, 200);
+          assert.deepEqual(res.body, result);
+          done();
+        });
+  });
+
+  test('13# Delete an issue with an invalid _id: DELETE request to /api/issues/{project}', function(done) {
+    console.log("running test 13");
+    let filter = {
+      _id: '000000ce62fbf40618fb6b00'
+    };
+    let result = { error: 'could not delete', '_id': '000000ce62fbf40618fb6b00' };
+    chai.request(server)
+        .delete('/api/issues/ftests')
+        .send(filter)
+        .end((err, res)=>{
+          assert.equal(res.status, 200);
+          assert.deepEqual(res.body, result);
+          done();
+        });
+  });
+
+  test('14# Delete an issue with missing _id: DELETE request to /api/issues/{project}', function(done) {
+    console.log("running test 14");
+    let filter = {};
+    let result = { error: 'missing _id' };
+    chai.request(server)
+        .delete('/api/issues/ftests')
+        .send(filter)
+        .end((err, res)=>{
+          assert.equal(res.status, 200);
+          assert.deepEqual(res.body, result);
+          done();
+        });
+  });
 });
