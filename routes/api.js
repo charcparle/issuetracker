@@ -1,6 +1,6 @@
 'use strict';
 const express = require('express');
-const mongoose    = require('mongoose');
+const mongoose = require('mongoose');
 const app = express();
 
 module.exports = (app)=>{
@@ -32,9 +32,15 @@ module.exports = (app)=>{
   
     .get((req, res)=>{
       let project = req.params.project;
+      
       async function showList(){
         console.log('inside showList');
+        let filter = req.query;
+        console.log(filter)
         let list = await Issue.aggregate([
+          {
+            $match: filter
+          },
           {
             $project: {
               a: {$ifNull: ["$assigned_to", ""]},
@@ -72,6 +78,7 @@ module.exports = (app)=>{
       let project = req.params.project;
       console.log(project);
       console.log(req.body);
+      
       async function createDoc(){
         let timeNow = Date.now();
         let newIssue = {
@@ -98,11 +105,22 @@ module.exports = (app)=>{
             }
 
           } else {
-            res.json(data);
+            let display = {
+              assigned_to: data.assigned_to,
+              status_text: data.status_text,
+              open: data.open,
+              _id: data._id,
+              issue_title: data.issue_title,
+              issue_text: data.issue_text,
+              created_by: data.created_by,
+              created_on: data.created_on,
+              updated_on: data.updated_on
+            }
+            res.json(display);
           }
-          
         })
       }
+
       connect(project).then(createDoc);
     })
     
