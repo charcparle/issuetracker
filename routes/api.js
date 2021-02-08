@@ -106,16 +106,20 @@ module.exports = (app)=>{
         Issue.create(newIssue,(err,data)=>{
           //console.log(err.errors)
           if (err) {
+            let valReqCount = 0;
             for (let errName in err.errors){
               console.log(`kind: ${err.errors[errName].kind}`)
               if (err.errors[errName].kind=='required'){
-                res.json({error: 'required field(s) missing'})
+                valReqCount += 1;               
               } else {
-                console.log(`{error: ${err.errors[errName].kind}}`)
-                //res.json({error: err.errors[errName].kind})
+                console.log(`{error: ${err.errors[errName].kind}}`);
               }
             }
-
+            if (valReqCount>0) {
+              res.json({error: 'required field(s) missing'});
+            } else {
+              res.json({error: err.errors[errName].kind});
+            }
           } else {
             let display = {
               assigned_to: data.assigned_to,
@@ -142,7 +146,6 @@ module.exports = (app)=>{
       async function updateDoc(){
         let update = {
           open: true,
-          updated_on: Date.now()
         };
         let nilUpdate = true;
         if (req.body.assigned_to!="" && req.body.assigned_to!=null) {
@@ -187,7 +190,8 @@ module.exports = (app)=>{
           let currentDB = await connect(project);
           let Issue = currentDB.model('Issue', issueSchema);
           console.log(`id: ${id}`)
-          Issue.findByIdAndUpdate(id, update, (err,data)=>{
+          update['updated_on'] = Date.now();
+          Issue.findByIdAndUpdate(id, update, {new:true}, (err,data)=>{
             if (err || (data==null)) {
               console.log(err)
               res.json({
@@ -197,12 +201,11 @@ module.exports = (app)=>{
             } else {
               console.log('successfully updated')
               console.log(`data: ${data}`)
+              console.log(`{result: 'successfully updated', '_id': ${req.body._id}}`)
               res.json({result: 'successfully updated', '_id': req.body._id})
             }
           });
-          
         }
-
       }
       updateDoc();
     })
@@ -237,7 +240,6 @@ module.exports = (app)=>{
               console.log(`successfully deleted, _id: ${id}`)
               res.json({result: 'successfully deleted', '_id': id})
             }
-            
           })
         }
       }
