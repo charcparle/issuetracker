@@ -219,7 +219,7 @@ suite('Functional Tests', function() {
     console.log("running test 11");
     let filter = {
       _id: 'invalidID',
-      issue_text: 'test 1 issue, updated in test 8'
+      issue_text: 'issue updated in test 11'
     };
     let result = { error: 'could not update', '_id': 'invalidID' };
     chai.request(server)
@@ -241,37 +241,33 @@ suite('Functional Tests', function() {
       created_by: "nobody",
       open: true
     };
-    const idForRemoval = async ()=>{
-      let id=0;
-      await chai.request(server)
+    
+    chai.request(server)
         .post('/api/issues/ftests')
         .send(submit)
-        .then((err, res)=>{
-          if (err) {
-            //console.log(err)
-          } else {
-            let id = res.body._id
-            //console.log(id)
-          };
+        .then((res)=>{
+          console.log('inside idForRemoval-then')
+          console.log(`res.body._id: ${res.body._id}`);
+          id = res.body._id;
+          deleteDoc(id);
         });
-      return id;
+
+    const deleteDoc = async (id)=>{
+      console.log(`inside deleteDoc`);
+      let filter = {
+        _id: id
+      };
+      let result = { result: 'successfully deleted', '_id': id };
+      chai.request(server)
+          .delete('/api/issues/ftests')
+          .send(filter)
+          .end((err, res)=>{
+            assert.equal(res.status, 200);
+            assert.deepEqual(res.body, result);
+            done();
+          });
     }
 
-    let someId = idForRemoval();
-    //console.log(someId)
-    
-    let filter = {
-      _id: someId
-    };
-    let result = { result: 'successfully deleted', '_id': someId };
-    chai.request(server)
-        .delete('/api/issues/ftests')
-        .send(filter)
-        .end((err, res)=>{
-          assert.equal(res.status, 200);
-          assert.deepEqual(res.body, result);
-          done();
-        });
   });
 
   test('13# Delete an issue with an invalid _id: DELETE request to /api/issues/{project}', function(done) {

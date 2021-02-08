@@ -128,6 +128,7 @@ module.exports = (app)=>{
               created_on: data.created_on,
               updated_on: data.updated_on
             }
+            console.log('created new issue')
             res.json(display);
           }
         })
