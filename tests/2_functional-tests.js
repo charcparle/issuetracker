@@ -77,7 +77,74 @@ suite('Functional Tests', function() {
     let filter = {
       created_by: "fCC"
     }
-    let result = [{"assigned_to":"","status_text":"","open":true,"_id":"601c0cd132fe6000dbfd99f4","issue_title":"Faux Issue Title","issue_text":"Functional Test - Required Fields Only","created_by":"fCC","created_on":"2021-02-04T15:03:45.304Z","updated_on":"2021-02-04T15:03:45.304Z"},{"assigned_to":"Chai and Mocha","status_text":"Chai and Mocha","open":true,"_id":"601c0cd132fe6000dbfd99f5","issue_title":"Faux Issue Title 2","issue_text":"Functional Test - Every field filled in","created_by":"fCC","created_on":"2021-02-04T15:03:45.596Z","updated_on":"2021-02-04T15:03:45.596Z"},{"assigned_to":"","status_text":"","open":true,"_id":"601c0cd232fe6000dbfd99f7","issue_title":"Faux Issue 1","issue_text":"Get Issues Test","created_by":"fCC","created_on":"2021-02-04T15:03:46.067Z","updated_on":"2021-02-04T15:03:46.067Z"},{"assigned_to":"","status_text":"","open":true,"_id":"601c0cd232fe6000dbfd99f8","issue_title":"Faux Issue 2","issue_text":"Get Issues Test","created_by":"fCC","created_on":"2021-02-04T15:03:46.311Z","updated_on":"2021-02-04T15:03:46.311Z"},{"assigned_to":"","status_text":"","open":true,"_id":"601c0cd232fe6000dbfd99f9","issue_title":"Faux Issue 3","issue_text":"Get Issues Test","created_by":"fCC","created_on":"2021-02-04T15:03:46.540Z","updated_on":"2021-02-04T15:03:46.540Z"},{"assigned_to":"","status_text":"","open":true,"_id":"601c0cd432fe6000dbfd99fe","issue_title":"Issue to be Updated","issue_text":"New Issue Text","created_by":"fCC","created_on":"2021-02-04T15:03:48.332Z","updated_on":"2021-02-04T15:03:48.747Z"}]
+    let result = [
+        {
+        "assigned_to": "",
+        "status_text": "",
+        "open": true,
+        "_id": "601c0cd132fe6000dbfd99f4",
+        "issue_title": "Faux Issue Title",
+        "issue_text": "Functional Test - Required Fields Only",
+        "created_by": "fCC",
+        "created_on": "2021-02-04T15:03:45.304Z",
+        "updated_on": "2021-02-04T15:03:45.304Z"
+        },
+        {
+        "assigned_to": "Chai and Mocha",
+        "status_text": "",
+        "open": true,
+        "_id": "601c0cd132fe6000dbfd99f5",
+        "issue_title": "Faux Issue Title 2",
+        "issue_text": "Functional Test - Every field filled in",
+        "created_by": "fCC",
+        "created_on": "2021-02-04T15:03:45.596Z",
+        "updated_on": "2021-02-04T15:03:45.596Z"
+        },
+        {
+        "assigned_to": "",
+        "status_text": "",
+        "open": true,
+        "_id": "601c0cd232fe6000dbfd99f7",
+        "issue_title": "Faux Issue 1",
+        "issue_text": "Get Issues Test",
+        "created_by": "fCC",
+        "created_on": "2021-02-04T15:03:46.067Z",
+        "updated_on": "2021-02-04T15:03:46.067Z"
+        },
+        {
+        "assigned_to": "",
+        "status_text": "",
+        "open": true,
+        "_id": "601c0cd232fe6000dbfd99f8",
+        "issue_title": "Faux Issue 2",
+        "issue_text": "Get Issues Test",
+        "created_by": "fCC",
+        "created_on": "2021-02-04T15:03:46.311Z",
+        "updated_on": "2021-02-04T15:03:46.311Z"
+        },
+        {
+        "assigned_to": "",
+        "status_text": "",
+        "open": true,
+        "_id": "601c0cd232fe6000dbfd99f9",
+        "issue_title": "Faux Issue 3",
+        "issue_text": "Get Issues Test",
+        "created_by": "fCC",
+        "created_on": "2021-02-04T15:03:46.540Z",
+        "updated_on": "2021-02-04T15:03:46.540Z"
+        },
+        {
+        "assigned_to": "",
+        "status_text": "",
+        "open": true,
+        "_id": "601c0cd432fe6000dbfd99fe",
+        "issue_title": "Issue to be Updated",
+        "issue_text": "New Issue Text",
+        "created_by": "fCC",
+        "created_on": "2021-02-04T15:03:48.332Z",
+        "updated_on": "2021-02-04T15:03:48.747Z"
+        }
+        ]
     chai.request(server)
         .get('/api/issues/ftests')
         .query(filter)

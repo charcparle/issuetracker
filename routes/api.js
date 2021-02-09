@@ -44,6 +44,18 @@ module.exports = (app)=>{
         console.log('inside showList');
         let filter = req.query;
         console.log(filter);
+        
+        // ## For GET with _id query
+        if (req.query._id!=null) {
+          try {
+            filter._id = mongoose.Types.ObjectId(req.query._id);
+          } catch (e) {
+            console.log(`req.query._id error`)
+            filter._id = mongoose.Types.ObjectId('000000000000000000000000');
+          }
+        }
+        // ##
+
         let currentDB = await connect(project);
         let Issue = currentDB.model('Issue', issueSchema);
         
@@ -54,7 +66,7 @@ module.exports = (app)=>{
           {
             $project: {
               a: {$ifNull: ["$assigned_to", ""]},
-              b: {$ifNull: ["$assigned_to", ""]},
+              b: {$ifNull: ["$status_text", ""]},
               c: "$open",
               d: "$_id",
               e: "$issue_title",
@@ -145,7 +157,7 @@ module.exports = (app)=>{
       console.log(req.body)
       async function updateDoc(){
         let update = {
-          open: true,
+          //open: true,
         };
         let nilUpdate = true;
         if (req.body.assigned_to!="" && req.body.assigned_to!=null) {
@@ -174,7 +186,8 @@ module.exports = (app)=>{
           id = mongoose.Types.ObjectId(req.body._id);
         } catch (e) {
           console.log(`e: ${e}`);
-          id = "000000000000000000000000"                    
+          id = "000000000000000000000000"
+          //throw new Error("error at obtaining ObjectId");
         }
         if (req.body._id==null){
           console.log('missing _id')
